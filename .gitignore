@@ -1,0 +1,13 @@
+venv/
+.env/
+*.pt
+*.pth
+*.h5
+*.pkl
+__pycache__/
+*.dll
+*.pyd
+*.so
+*.exe
+.DS_Store
+.ipynb_checkpoints/

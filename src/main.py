@@ -1,10 +1,3 @@
-"""
-Main runner script:
-- trains tabular models with tuning
-- computes SHAP + plots
-- trains multimodal (with synthetic data if real data missing)
-- produces final summary reports
-"""
 import warnings
 warnings.filterwarnings("ignore")
 from .models_tabular import train_and_tune

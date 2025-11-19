@@ -1,7 +1,3 @@
-"""
-SHAP utilities: compute shap values for tree models and for linear models with KernelExplainer.
-Saves summary and dependence plots.
-"""
 import shap
 import numpy as np
 import pandas as pd

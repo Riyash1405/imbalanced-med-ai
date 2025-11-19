@@ -1,8 +1,3 @@
-"""
-Large training and tuning module for tabular models.
-Includes grid search and Optuna tuning.
-Saves best models and produces detailed evaluation files.
-"""
 import os
 import numpy as np
 import pandas as pd

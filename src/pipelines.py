@@ -1,7 +1,3 @@
-"""
-Tabular preprocessing and pipeline builders.
-Includes many resampling options and model builders.
-"""
 import numpy as np
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
@@ -10,7 +6,7 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 
-# resamplers
+
 from imblearn.over_sampling import SMOTE, ADASYN, BorderlineSMOTE
 from imblearn.combine import SMOTETomek, SMOTEENN
 from imblearn.pipeline import Pipeline as ImbPipeline
@@ -41,9 +37,8 @@ def build_model_pipeline(model_name="rf", resampler="smote"):
     }
     model = models[model_name]
     sampler = resamplers.get(resampler, SMOTE())
-    # preprocessor will be attached later (needs X to compute cols)
     pipe = ImbPipeline(steps=[
-        ("preprocess", "passthrough"),  # will replace with ColumnTransformer in training code
+        ("preprocess", "passthrough"),  
         ("resample", sampler),
         ("clf", model)
     ])

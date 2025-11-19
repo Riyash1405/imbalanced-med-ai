@@ -1,8 +1,3 @@
-"""
-Tabular data loaders and optional CT/genomics loaders.
-This module handles reading csvs, basic cleaning, missing value handling,
-and returns train/test splits.
-"""
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split

@@ -1,33 +1,34 @@
+# src/shap_utils.py
 import shap
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from .config import PLOTS_DIR
-from sklearn.base import is_classifier
 
-def compute_shap_for_pipeline(pipe, X_sample, model_name="model", max_display=20):
+def compute_shap_for_pipeline(pipe, X_bg_trans, X_shap_trans):
     """
-    pipe: full pipeline with preprocess + clf
-    X_sample: pandas DataFrame of raw features (not transformed)
+    - pipe: fitted imblearn pipeline with named_steps 'clf' and 'pre'
+    - X_bg_trans: numpy array (background) after pre.transform
+    - X_shap_trans: numpy array (samples to explain) after pre.transform
+    Returns shap_values or raises.
     """
-    preproc = pipe.named_steps["preprocess"]
-    model = pipe.named_steps["clf"]
-    X_trans = preproc.transform(X_sample)
+    clf = pipe.named_steps.get('clf', None)
+    if clf is None:
+        raise ValueError("pipeline has no clf")
 
-    # For tree models use TreeExplainer on model only but shap expects original feature names
-    try:
-        explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(X_trans)
-        # use X_sample for feature names if preproc has transformer that returns numpy; we assume columns match in order
-        shap.summary_plot(shap_values, X_sample, max_display=max_display, show=False)
-        plt.savefig(PLOTS_DIR / "shap" / f"{model_name}_summary.png")
-        plt.close()
-    except Exception as e:
-        print("TreeExplainer failed, falling back to KernelExplainer:", e)
-        # Kernel explainer (slower)
-        background = X_trans[np.random.choice(X_trans.shape[0], min(50, X_trans.shape[0]), replace=False)]
-        explainer = shap.KernelExplainer(lambda x: model.predict_proba(x)[:,1], background)
-        shap_values = explainer.shap_values(X_trans[:100])
-        shap.summary_plot(shap_values, X_sample.iloc[:100], show=False)
-        plt.savefig(PLOTS_DIR / "shap" / f"{model_name}_kernel_summary.png")
-        plt.close()
+    cls_name = clf.__class__.__name__.lower()
+
+    # Tree models: use interventional perturbation to avoid leaf-coverage issues.
+    if 'randomforest' in cls_name or 'xgb' in cls_name or 'lightgbm' in cls_name or 'lgbm' in cls_name:
+        expl = shap.TreeExplainer(clf, feature_perturbation="interventional")
+        # use check_additivity=False to avoid numeric additivity errors on approximations
+        vals = expl.shap_values(X_shap_trans, check_additivity=False)
+        return vals
+
+    # Linear models
+    if 'logistic' in cls_name or 'linear' in cls_name:
+        expl = shap.LinearExplainer(clf, X_bg_trans, feature_perturbation="interventional")
+        vals = expl.shap_values(X_shap_trans)
+        return vals
+
+    # Fallback: KernelExplainer (slow) with small background
+    expl = shap.KernelExplainer(clf.predict_proba, X_bg_trans[:50])
+    vals = expl.shap_values(X_shap_trans[:50])
+    return vals

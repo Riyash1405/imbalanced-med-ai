@@ -1,0 +1,6 @@
+{
+  "dataset": "cardiovascular",
+  "n_samples": 70000,
+  "n_features": 11,
+  "target_col": "cardio"
+}

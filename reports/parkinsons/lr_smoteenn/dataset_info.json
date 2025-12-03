@@ -1,0 +1,6 @@
+{
+  "dataset": "parkinsons",
+  "n_samples": 100,
+  "n_features": 2,
+  "target_col": "target"
+}

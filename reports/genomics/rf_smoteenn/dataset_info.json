@@ -1,0 +1,6 @@
+{
+  "dataset": "genomics",
+  "n_samples": 1000,
+  "n_features": 257,
+  "target_col": "target"
+}
